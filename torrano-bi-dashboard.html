@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TORRANO BI | Cockpit Executivo Flávio Torrano</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans, Space Grotesk & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS CDN -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cockpit: {
+              bg: '#060A12',
+              sidebar: '#090E17',
+              card: '#111C32',
+              border: '#1E2E4E',
+              borderHover: '#2A3F68',
+              cyan: '#00D2FF',
+              blue: '#1D68FF',
+              emerald: '#10B981',
+              muted: '#94A3B8',
+            },
+            torrano: {
+              red: '#E60000',
+              redDark: '#B80000',
+              redHover: '#FF1A1A',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #060A12;
+      color: #FFFFFF;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #060A12;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #1E2E4E;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #00D2FF;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="selection:bg-torrano-red/30 selection:text-white flex flex-col min-h-screen">
+
+  <!-- ========================================== -->
+  <!-- MAIN COCKPIT VIEWPORT (FULL-WIDTH FLUID)   -->
+  <!-- ========================================== -->
+  <div class="w-full flex flex-col flex-1 min-h-screen">
+    
+    <!-- Top Cockpit Status Bar with Torrano Logo & War Room Identity & Isolated Tabs -->
+    <header class="sticky top-0 z-30 bg-[#090E17]/95 backdrop-blur-md border-b border-[#1E2E4E] px-4 sm:px-6 lg:px-8 py-3 flex flex-col xl:flex-row xl:items-center justify-between gap-3.5">
+      <!-- Left: Logotipo oficial da Torrano Negócios Imobiliários -->
+      <div class="flex items-center gap-3.5 shrink-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E60000] to-[#B80000] flex items-center justify-center text-white font-black text-xl shadow-[0_0_20px_rgba(230,0,0,0.4)] border border-[#E60000]/60 shrink-0">
+          T
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-black tracking-tight text-[#E60000] drop-shadow-[0_0_12px_rgba(230,0,0,0.5)] font-display leading-tight">
+              TORRANO
+            </span>
+            <span class="hidden sm:inline-block text-[#1E2E4E]">|</span>
+            <span class="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-slate-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-[#00D2FF]">TORRANO BI</span>
+              <span class="text-slate-500">•</span>
+              <span class="text-white">WAR ROOM EXECUTIVO</span>
+            </span>
+          </div>
+          <div class="text-[9px] font-bold tracking-[0.24em] text-[#94A3B8] uppercase">
+            NEGÓCIOS IMOBILIÁRIOS
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. SELETOR DE ABAS PRINCIPAIS NO CABEÇALHO -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto pb-1 xl:pb-0 custom-scroll max-w-full">
+        <button onclick="setTeamView('all')" id="tab-all" class="team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide bg-slate-900 text-white shadow-[0_0_15px_rgba(230,0,0,0.4)] border-2 border-[#E60000] ring-1 ring-[#E60000]/60">
+          <span class="text-sm">🏢</span>
+          <span>DIRETORIA (CONSOLIDADO)</span>
+        </button>
+        <button onclick="setTeamView('bruno')" id="tab-bruno" class="team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+          <span class="text-sm">👤</span>
+          <span>EQUIPE BRUNO</span>
+        </button>
+        <button onclick="setTeamView('lorena')" id="tab-lorena" class="team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+          <span class="text-sm">👤</span>
+          <span>EQUIPE LORENA</span>
+        </button>
+        <button onclick="setTeamView('lucas')" id="tab-lucas" class="team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+          <span class="text-sm">👤</span>
+          <span>EQUIPE LUCAS</span>
+        </button>
+        <button onclick="setTeamView('comparison')" id="tab-comparison" class="team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+          <span class="text-sm">⚡</span>
+          <span>WAR ROOM (COMPARATIVO GERAL)</span>
+        </button>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2.5 shrink-0 self-end xl:self-center">
+        <button onclick="openKeyModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-[#1E2E4E] text-[#94A3B8] hover:text-white text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer">
+          <span>🔑</span>
+          <span id="keyBtnText" class="hidden sm:inline">Chave IA</span>
+        </button>
+
+        <button onclick="scrollToAiSection()" class="px-3.5 py-1.5 rounded-xl bg-[#E60000] hover:bg-[#CC0000] text-white text-xs font-bold shadow-[0_0_15px_rgba(230,0,0,0.3)] transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>✨</span>
+          <span class="hidden sm:inline">TORRANO AI</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 max-w-[1600px] w-full mx-auto">
+      
+      <!-- Notification Banner -->
+      <div id="notificationBanner" class="hidden p-4 rounded-2xl border text-xs font-semibold flex items-center justify-between shadow-xl">
+        <span id="notificationMsg"></span>
+        <button onclick="document.getElementById('notificationBanner').classList.add('hidden')" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 2. BANNER SUPERIOR HERO (COM MONTANHA)     -->
+      <!-- ========================================== -->
+      <div class="relative rounded-3xl overflow-hidden border border-[#1E2E4E] shadow-2xl bg-[#090E17]">
+        <!-- Scenic dark mountain image overlay -->
+        <div 
+          class="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-luminosity scale-105 pointer-events-none"
+          style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80')"
+        ></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#060A12] via-[#0B1323]/90 to-[#060A12]/80 pointer-events-none"></div>
+
+        <div class="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div class="space-y-2.5 max-w-3xl">
+            <!-- Dynamic Badge do Topo -->
+            <div id="heroBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E60000]/20 border border-[#E60000]/40 text-white text-xs font-mono font-bold tracking-wider shadow-[0_0_15px_rgba(230,0,0,0.2)]">
+              <span class="w-2 h-2 rounded-full bg-[#E60000] animate-pulse"></span>
+              <span id="heroBadgeText">🏢 DIRETORIA GERAL • VISÃO CONSOLIDADA</span>
+            </div>
+
+            <!-- Título Principal Dinâmico -->
+            <h1 id="heroTitle" class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight font-display">
+              Painel Executivo Flávio Torrano
+            </h1>
+
+            <!-- Subtítulo Dinâmico -->
+            <p id="heroSubtitle" class="text-xs sm:text-sm text-[#94A3B8] leading-relaxed max-w-2xl">
+              Acompanhamento consolidado de VGV, fluxo de documentos, destratos e desempenho corporativo global.
+            </p>
+          </div>
+
+          <!-- Botões da Direita -->
+          <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
+            
+            <button onclick="document.getElementById('excelInput').click()" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider rounded-xl bg-gradient-to-r from-[#1D68FF] to-[#00D2FF] hover:from-[#1D68FF]/90 hover:to-[#00D2FF]/90 text-white shadow-[0_0_25px_rgba(0,210,255,0.35)] border border-[#00D2FF]/60 active:scale-95 transition-all cursor-pointer">
+              <span>📁</span>
+              <span>Importar Planilha (.xlsx)</span>
+            </button>
+
+            <button onclick="downloadExcelTemplate()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-[#1E2E4E] transition-colors cursor-pointer" title="Baixar Modelo de Planilha">
+              <span>📥</span>
+              <span class="hidden sm:inline">Modelo Excel</span>
+            </button>
+
+            <button id="btnResetData" onclick="resetToMockData()" class="hidden px-2.5 py-2 text-xs font-semibold text-[#E60000] hover:underline cursor-pointer">
+              Restaurar Padrão
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 3. LINHA DE BOTÕES PÍLULA (SELETOR DE EQUIPES) -->
+      <!-- ========================================== -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 bg-[#090E17]/80 rounded-2xl border border-[#1E2E4E]">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 custom-scroll">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono hidden md:inline ml-2 mr-1">
+            Visualização:
+          </span>
+
+          <button onclick="setTeamView('all')" id="pill-all" class="team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide bg-slate-900 text-white shadow-[0_0_15px_rgba(230,0,0,0.4)] border-2 border-[#E60000] ring-1 ring-[#E60000]/60">
+            <span>🏢</span>
+            <span>DIRETORIA (CONSOLIDADO)</span>
+          </button>
+
+          <button onclick="setTeamView('bruno')" id="pill-bruno" class="team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+            <span>👤</span>
+            <span>EQUIPE BRUNO</span>
+          </button>
+
+          <button onclick="setTeamView('lorena')" id="pill-lorena" class="team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+            <span>👤</span>
+            <span>EQUIPE LORENA</span>
+          </button>
+
+          <button onclick="setTeamView('lucas')" id="pill-lucas" class="team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+            <span>👤</span>
+            <span>EQUIPE LUCAS</span>
+          </button>
+
+          <button onclick="setTeamView('comparison')" id="pill-comparison" class="team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60">
+            <span>⚡</span>
+            <span>WAR ROOM (COMPARATIVO GERAL)</span>
+          </button>
+        </div>
+
+        <button onclick="scrollToAiSection()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#E60000] to-red-700 hover:from-[#E60000]/90 hover:to-red-600 shadow-[0_0_15px_rgba(230,0,0,0.3)] border border-[#E60000]/60 transition-all cursor-pointer self-start sm:self-center mr-1">
+          <span>✨</span>
+          <span>Parecer TORRANO AI</span>
+        </button>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 4. GRID DE CARDS DE INDICADORES (8 CARDS)  -->
+      <!-- ========================================== -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3.5">
+        
+        <!-- Card 1 (Ícone Azul): Total Leads -->
+        <div class="bg-[#111C32]/90 border border-[#1E2E4E] hover:border-[#2A3F68] rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Total Leads</span>
+              <div class="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                👥
+              </div>
+            </div>
+            <div class="text-2xl font-black font-display text-white mt-2 tabular-nums" id="cardLeads">
+              1.410
+            </div>
+            <div class="text-[11px] text-[#94A3B8] mt-1 font-mono">
+              <span class="text-emerald-400 font-bold">+12%</span> vs. mês ant.
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#1E2E4E] flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+            <span>Topo de Funil</span>
+            <span class="text-blue-400 font-bold">100% Vol.</span>
+          </div>
+        </div>
+
+        <!-- Card 2 (Ícone Ciano): Documentos Analisados -->
+        <div class="bg-[#111C32]/90 border border-[#1E2E4E] hover:border-[#00D2FF]/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Docs Analisados</span>
+              <div class="w-8 h-8 rounded-xl bg-[#00D2FF]/15 border border-[#00D2FF]/30 flex items-center justify-center text-[#00D2FF] group-hover:scale-110 transition-transform">
+                📑
+              </div>
+            </div>
+            <div class="text-2xl font-black font-display text-white mt-2 tabular-nums" id="cardAnalyzedDocs">
+              478
+            </div>
+            <div class="text-[11px] text-[#94A3B8] mt-1 font-mono">
+              Pastas montadas
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#1E2E4E] flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+            <span>Qualificação</span>
+            <span class="text-[#00D2FF] font-bold" id="cardDocRate">33.9%</span>
+          </div>
+        </div>
+
+        <!-- Card 3 (Ícone Roxo): Tx. Doc / Leads -->
+        <div class="bg-[#111C32]/90 border border-[#1E2E4E] hover:border-purple-500/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Tx. Doc / Leads</span>
+              <div class="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                📊
+              </div>
+            </div>
+            <div class="text-2xl font-black font-display text-purple-300 mt-2 tabular-nums" id="cardDocPerLead">
+              33.9%
+            </div>
+            <div class="text-[11px] text-[#94A3B8] mt-1 font-mono">
+              Conversão em pasta
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#1E2E4E] flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+            <span>Meta Alvo</span>
+            <span class="text-purple-400 font-bold">&gt; 30.0%</span>
+          </div>
+        </div>
+
+        <!-- Card 4 (Ícone Âmbar): Em Aprovação -->
+        <div class="bg-[#111C32]/90 border border-[#1E2E4E] hover:border-amber-500/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Em Aprovação</span>
+              <div class="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                ⏳
+              </div>
+            </div>
+            <div class="text-2xl font-black font-display text-amber-300 mt-2 tabular-nums" id="cardPendingApproval">
+              396
+            </div>
+            <div class="text-[11px] text-[#94A3B8] mt-1 font-mono">
+              Esteira bancária ativa
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#1E2E4E] flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+            <span>Previsão 15d</span>
+            <span class="text-amber-400 font-bold">Em trânsito</span>
+          </div>
+        </div>
+
+        <!-- Card 5 (Ícone Verde): Vendas Brutas -->
+        <div class="bg-[#111C32]/90 border border-[#1E2E4E] hover:border-emerald-500/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Vendas Brutas</span>
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                📈
+              </div>
+            </div>
+            <div class="text-xl xl:text-2xl font-black font-display text-white mt-2 tabular-nums" id="cardVgvGross">
+              R$ 63.100.000
+            </div>
+            <div class="text-[11px] text-slate-300 mt-1 font-mono" id="cardGrossContracts">
+              82 contratos
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#1E2E4E] flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+            <span>Ticket Médio</span>
+            <span class="text-emerald-400 font-bold" id="cardTicketAverage">R$ 769k</span>
+          </div>
+        </div>
+
+        <!-- Card 6 (Ícone Vermelho #E60000): Destratos -->
+        <div class="bg-[#111C32]/90 border-2 border-[#E60000]/60 hover:border-[#E60000] rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden bg-gradient-to-b from-[#111C32] to-[#E60000]/10">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-black text-[#E60000] uppercase tracking-wider flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#E60000] animate-ping"></span>
+                Destratos
+              </span>
+              <div class="w-8 h-8 rounded-xl bg-[#E60000]/20 border border-[#E60000]/40 flex items-center justify-center text-[#E60000] group-hover:scale-110 transition-transform">
+                ⚠️
+              </div>
+            </div>
+            <div class="text-xl xl:text-2xl font-black font-display text-[#E60000] mt-2 tabular-nums drop-shadow-[0_0_10px_rgba(230,0,0,0.3)]" id="cardVgvCanceled">
+              R$ 6.804.000
+            </div>
+            <div class="text-[11px] text-red-300 mt-1 font-mono" id="cardCanceledContracts">
+              10 contratos cancelados
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#E60000]/30 flex items-center justify-between text-[10px] font-mono">
+            <span class="text-red-300 font-semibold">% Quebra:</span>
+            <span class="font-black text-white bg-[#E60000] px-1.5 py-0.5 rounded text-[10px]" id="cardCancellationRate">
+              10.8%
+            </span>
+          </div>
+        </div>
+
+        <!-- Card 7 (Ícone Azul Elétrico): Tx. Eficiência -->
+        <div class="bg-[#111C32]/90 border border-[#1E2E4E] hover:border-[#1D68FF]/50 rounded-2xl p-4 flex flex-col justify-between shadow-lg transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider">Tx. Eficiência</span>
+              <div class="w-8 h-8 rounded-xl bg-[#1D68FF]/15 border border-[#1D68FF]/30 flex items-center justify-center text-[#00D2FF] group-hover:scale-110 transition-transform">
+                ⚡
+              </div>
+            </div>
+            <div class="text-2xl font-black font-display text-white mt-2 tabular-nums" id="cardEfficiencyRate">
+              17.2%
+            </div>
+            <div class="text-[11px] text-[#94A3B8] mt-1 font-mono">
+              Pastas &rarr; Vendas Brutas
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#1E2E4E] flex items-center justify-between text-[10px] font-mono text-[#94A3B8]">
+            <span>Aprovação Final</span>
+            <span class="text-[#00D2FF] font-bold" id="cardEfficiencySub">82 un.</span>
+          </div>
+        </div>
+
+        <!-- Card 8 (Card Destaque Verde Esmeralda à direita): VGV Líquido -->
+        <div class="bg-[#111C32]/95 border-2 border-emerald-500/70 hover:border-emerald-400 rounded-2xl p-4 flex flex-col justify-between shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-300 group hover:-translate-y-0.5 relative overflow-hidden bg-gradient-to-b from-[#111C32] to-emerald-950/30">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                VGV Líquido
+              </span>
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-sm">
+                💰
+              </div>
+            </div>
+            <div class="text-xl xl:text-2xl font-black font-display text-emerald-400 mt-2 tabular-nums drop-shadow-[0_0_12px_rgba(16,185,129,0.35)]" id="cardVgvNet">
+              R$ 56.296.000
+            </div>
+            <div class="text-[11px] text-emerald-200 mt-1 font-mono" id="cardNetContracts">
+              72 contratos retidos
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-emerald-500/30 flex items-center justify-between text-[10px] font-mono">
+            <span class="text-emerald-300 font-semibold">Retenção Real:</span>
+            <span class="font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded text-[10px]" id="cardRetentionRate">
+              89.2%
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- 5. SEÇÃO INFERIOR DE GRÁFICOS (BLINDADA)   -->
+      <!-- ========================================== -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Bloco 1: Funil Comercial Exclusivo da Equipe Ativa -->
+        <div id="funnelCard" class="lg:col-span-6 bg-[#111C32]/90 border border-[#1E2E4E] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[#1E2E4E]">
+            <div>
+              <h3 class="text-sm font-black text-white font-display flex items-center gap-2">
+                <span>⚡ Funil Comercial • <span id="funnelTitleTeam">Consolidado Geral</span></span>
+              </h3>
+              <p class="text-[11px] text-[#94A3B8]">
+                Leads &rarr; Pastas &rarr; Vendas Brutas &rarr; Vendas Líquidas
+              </p>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#1D68FF]/20 text-[#00D2FF] border border-[#00D2FF]/30" id="funnelTeamBadge">
+              Consolidado Geral
+            </span>
+          </div>
+
+          <div class="h-64 relative">
+            <canvas id="funnelCanvas"></canvas>
+          </div>
+
+          <div class="pt-3 border-t border-[#1E2E4E] flex items-center justify-between text-xs font-mono text-[#94A3B8]">
+            <span>Conversão Global:</span>
+            <span class="font-bold text-emerald-400" id="funnelGlobalConv">5.1% (72 de 1.410)</span>
+          </div>
+        </div>
+
+        <!-- Bloco 2A: Evolução e Comparativo (EXCLUSIVO DA ABA WAR ROOM) -->
+        <div id="comparativeBlock" class="hidden lg:col-span-7 bg-[#111C32]/90 border border-[#1E2E4E] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[#1E2E4E]">
+            <div>
+              <h3 class="text-sm font-black text-white font-display flex items-center gap-2">
+                <span>📈 Evolução e Comparativo • War Room</span>
+              </h3>
+              <p class="text-[11px] text-[#94A3B8]">
+                Vendas Brutas vs. Vendas Líquidas vs. Destratos (Bruno x Lorena x Lucas)
+              </p>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-[#1E2E4E]">
+              Valores em R$ Milhões
+            </span>
+          </div>
+
+          <div class="h-64 relative">
+            <canvas id="comparativeCanvas"></canvas>
+          </div>
+
+          <div class="pt-3 border-t border-[#1E2E4E] grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs font-mono" id="compCardsContainer">
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-[#1E2E4E] space-y-1">
+              <div class="flex items-center justify-between text-slate-300 font-bold">
+                <span>Equipe Bruno</span>
+                <span class="text-[10px] text-blue-400 font-semibold">Médio/Alto</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">VGV Líquido:</span>
+                <span class="font-bold text-white" id="compBrunoNet">R$ 17.650.000</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">Destratos:</span>
+                <span class="font-bold text-[#E60000]" id="compBrunoCancel">R$ 3.850.000 (17.9%)</span>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-[#1E2E4E] space-y-1">
+              <div class="flex items-center justify-between text-slate-300 font-bold">
+                <span>Equipe Lorena</span>
+                <span class="text-[10px] text-amber-400 font-semibold">Lançamentos</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">VGV Líquido:</span>
+                <span class="font-bold text-amber-400" id="compLorenaNet">R$ 14.300.000</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">Destratos:</span>
+                <span class="font-bold text-[#E60000]" id="compLorenaCancel">R$ 2.500.000 (14.9%)</span>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-[#1E2E4E] space-y-1">
+              <div class="flex items-center justify-between text-slate-300 font-bold">
+                <span>Equipe Lucas</span>
+                <span class="text-[10px] text-emerald-400 font-semibold">Prime</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">VGV Líquido:</span>
+                <span class="font-bold text-emerald-400" id="compLucasNet">R$ 24.350.000</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">Destratos:</span>
+                <span class="font-bold text-emerald-400" id="compLucasCancel">R$ 450.000 (1.8%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 2B: Raio-X de Estanqueidade de Caixa (EXCLUSIVO PARA ABA INDIVIDUAL OU DIRETORIA) -->
+        <div id="isolatedShieldBlock" class="lg:col-span-6 bg-[#111C32]/90 border border-[#1E2E4E] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[#1E2E4E]">
+            <div>
+              <h3 class="text-sm font-black text-white font-display flex items-center gap-2">
+                <span>📊 Raio-X de Estanqueidade de Caixa • <span id="shieldBlockTeam">Consolidado Geral</span></span>
+              </h3>
+              <p class="text-[11px] text-[#94A3B8]">
+                Auditoria restrita de retenção financeira e eficiência documental
+              </p>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              Sessão Blindada
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-slate-900/80 border border-[#1E2E4E] space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                VGV Líquido em Caixa
+              </span>
+              <div class="text-xl font-black text-emerald-400 font-display" id="shieldVgvNet">
+                R$ 56.300.000
+              </div>
+              <div class="text-[10px] text-slate-300 font-mono" id="shieldNetContracts">
+                72 contratos mantidos (89.2% de retenção)
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-900/80 border-2 border-[#E60000]/40 space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-[#E60000] font-mono flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#E60000] animate-ping"></span>
+                Destratos / Quebras
+              </span>
+              <div class="text-xl font-black text-[#E60000] font-display" id="shieldVgvCanceled">
+                R$ 6.800.000
+              </div>
+              <div class="text-[10px] text-red-300/80 font-mono" id="shieldCanceledContracts">
+                9 quebras (10.8%)
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-900/80 border border-[#1E2E4E] space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Vendas Brutas Emitidas
+              </span>
+              <div class="text-lg font-bold text-white font-display" id="shieldVgvGross">
+                R$ 63.100.000
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono" id="shieldGrossContracts">
+                81 contratos formalizados
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-900/80 border border-[#1E2E4E] space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Ticket Médio da Operação
+              </span>
+              <div class="text-lg font-bold text-[#00D2FF] font-display" id="shieldTicketAvg">
+                R$ 779.012
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono" id="shieldAnalyzedDocs">
+                314 pastas qualificadas
+              </div>
+            </div>
+          </div>
+
+          <!-- Goal Achievement Bar -->
+          <div class="p-3.5 rounded-xl bg-[#090E17] border border-[#1E2E4E] space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-300 font-semibold">Meta de VGV Líquido (<span id="shieldTargetVal">R$ 53.500.000</span>):</span>
+              <span class="font-bold text-emerald-400" id="shieldTargetAchieved">
+                105.2% atingido
+              </span>
+            </div>
+            <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-[#1E2E4E]/80">
+              <div 
+                id="shieldProgressBar"
+                class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-[#00D2FF] transition-all duration-500 shadow-md"
+                style="width: 100%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ========================================== -->
+      <!-- PAINEL TORRANO AI (DIAGNÓSTICO ESTRATÉGICO) -->
+      <!-- ========================================== -->
+      <section id="torrano-ai-section" class="bg-[#111C32]/95 border-2 border-[#E60000] rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-4">
+        <div class="absolute -top-24 right-0 w-96 h-48 bg-[#E60000]/15 blur-3xl pointer-events-none rounded-full"></div>
+        
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#1E2E4E] relative z-10">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E60000] to-[#B80000] flex items-center justify-center text-white font-black text-xl shadow-lg border border-[#E60000]/60">
+              ✨
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#E60000]/20 text-[#E60000] border border-[#E60000]/40">
+                  TORRANO AI
+                </span>
+                <span class="text-sm font-black text-white font-display">
+                  PARECER TÁTICO PARA FLÁVIO TORRANO
+                </span>
+              </div>
+              <p class="text-xs text-[#94A3B8] mt-0.5">
+                Auditoria executiva de retenção de caixa, gargalos nas pastas e riscos de destrato de Bruno, Lorena e Lucas.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="processAiReport()" class="px-4 py-2 text-xs font-black uppercase tracking-wider text-white bg-[#E60000] hover:bg-[#CC0000] rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2 active:scale-95">
+              <span>✨</span>
+              <span>Processar Diagnóstico IA</span>
+            </button>
+            <button onclick="copyAiReport()" class="px-3 py-2 text-xs font-semibold text-[#94A3B8] hover:text-white bg-slate-800 hover:bg-slate-700 border border-[#1E2E4E] rounded-xl transition-colors cursor-pointer">
+              <span id="copyBtnText">📋 Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="bg-black/60 border border-[#1E2E4E] rounded-xl p-4.5 space-y-2">
+          <div class="flex items-center justify-between pb-2 border-b border-[#1E2E4E]">
+            <div class="flex items-center gap-2 text-xs font-mono text-[#94A3B8]">
+              <span class="w-2 h-2 rounded-full bg-[#00D2FF] animate-pulse"></span>
+              <span class="text-white font-bold">DESPACHO EXECUTIVO DA DIRETORIA COMERCIAL</span>
+            </div>
+            <span class="text-[10px] font-mono text-slate-500">CONFIDENCIAL · FLÁVIO TORRANO</span>
+          </div>
+          <div id="aiTerminalText" class="text-xs text-slate-200 leading-relaxed font-sans whitespace-pre-line min-h-[4rem]">
+            Clique em "Processar Diagnóstico IA" para analisar a operação comercial ao vivo.
+          </div>
+        </div>
+
+        <!-- 3 Structured Executive Pillars -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <div class="bg-slate-900/90 border border-[#1E2E4E] rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 pb-2 border-b border-[#1E2E4E]">
+              <span class="text-base text-[#E60000]">⚠️</span>
+              <h4 class="text-xs font-black uppercase tracking-wider text-white">
+                1. Vazamento de Caixa e Destratos
+              </h4>
+            </div>
+            <div class="text-xs text-[#94A3B8] leading-relaxed space-y-1.5" id="aiPillar1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="bg-slate-900/90 border border-[#1E2E4E] rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 pb-2 border-b border-[#1E2E4E]">
+              <span class="text-base text-[#00D2FF]">⚡</span>
+              <h4 class="text-xs font-black uppercase tracking-wider text-white">
+                2. Eficiência de Funil (Leads x Pastas)
+              </h4>
+            </div>
+            <div class="text-xs text-[#94A3B8] leading-relaxed space-y-1.5" id="aiPillar2">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="bg-slate-900/90 border border-[#1E2E4E] rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2 pb-2 border-b border-[#1E2E4E]">
+              <span class="text-base text-emerald-400">🚀</span>
+              <h4 class="text-xs font-black uppercase tracking-wider text-white">
+                3. Recomendações Táticas Imediatas
+              </h4>
+            </div>
+            <div class="text-xs text-[#94A3B8] leading-relaxed space-y-1.5" id="aiPillar3">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Matriz Comercial por Líder de Equipe (EXCLUSIVO DA ABA WAR ROOM) -->
+      <div id="matrixTableContainer" class="hidden bg-[#111C32]/90 border border-[#1E2E4E] rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-4.5 border-b border-[#1E2E4E] flex items-center justify-between bg-slate-900/60">
+          <div>
+            <h4 class="text-sm font-black text-white flex items-center gap-2 font-display">
+              <span>Matriz Comercial por Líder de Equipe</span>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded bg-[#E60000] text-white">
+                OFICIAL
+              </span>
+            </h4>
+            <p class="text-xs text-[#94A3B8] mt-0.5">
+              Acompanhamento de Bruno Torrano, Lorena Vasconcelos e Lucas Siqueira
+            </p>
+          </div>
+          <div class="text-xs font-mono text-[#94A3B8]">
+            Meta Geral: <strong class="text-emerald-400">R$ 53,5M</strong>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left text-xs font-sans">
+            <thead class="bg-black/50 text-[#94A3B8] uppercase tracking-wider text-[10px] font-mono border-b border-[#1E2E4E]">
+              <tr>
+                <th class="py-3 px-4">Equipe / Líder</th>
+                <th class="py-3 px-3 text-right">Leads</th>
+                <th class="py-3 px-3 text-right">Pastas Analisadas</th>
+                <th class="py-3 px-3 text-right">Conv. Pastas</th>
+                <th class="py-3 px-3 text-right">Vendas Brutas (R$)</th>
+                <th class="py-3 px-3 text-right">Contratos</th>
+                <th class="py-3 px-3 text-right text-[#E60000]">Destratos (R$)</th>
+                <th class="py-3 px-3 text-right text-[#E60000]">% Quebra</th>
+                <th class="py-3 px-3 text-right text-emerald-400">VGV Líquido (R$)</th>
+                <th class="py-3 px-4 text-center">Retenção</th>
+              </tr>
+            </thead>
+            <tbody id="matrixTableBody" class="divide-y divide-[#1E2E4E] font-mono">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[#1E2E4E] bg-[#090E17] py-4 px-6 text-xs text-slate-500 font-mono">
+      <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#E60000]"></span>
+          <span class="text-white font-bold">TORRANO</span> NEGÓCIOS IMOBILIÁRIOS · Cockpit Executivo
+        </div>
+        <div>
+          Diretoria Flávio Torrano · SheetJS + Chart.js Nativo
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Modal API Key -->
+  <div id="keyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-[#111C32] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-[#1E2E4E] relative">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2 font-display">
+          <span>🔑 Google Gemini API Key</span>
+        </h3>
+        <button onclick="closeKeyModal()" class="text-slate-400 hover:text-white font-bold p-1">✕</button>
+      </div>
+      <p class="text-xs text-[#94A3B8] leading-relaxed font-sans">
+        Insira sua chave do Google Gemini para conectar o parecer de IA diretamente aos modelos <strong class="text-white">Gemini 2.0 Flash / 1.5 Flash</strong>. A chave é salva temporariamente em <code class="text-[#00D2FF] font-mono">sessionStorage</code>.
+      </p>
+      <input type="password" id="geminiKeyInput" placeholder="Cole sua chave (Ex: AIzaSy...)" class="w-full bg-slate-900 border border-[#1E2E4E] focus:border-[#E60000] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 font-mono outline-none">
+      
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeKeyModal()" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Cancelar</button>
+        <button onclick="saveApiKey()" class="px-5 py-2 text-xs font-bold text-white bg-[#E60000] hover:bg-[#CC0000] rounded-xl shadow-lg cursor-pointer">
+          Salvar Chave
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const INITIAL_DATA = {
+      all: {
+        id: 'all',
+        name: 'Consolidado Geral',
+        leader: 'Flávio Torrano',
+        segment: 'Todos os Segmentos',
+        leads: 1410,
+        analyzedDocs: 478,
+        vgvGross: 63100000,
+        contractsGross: 82,
+        vgvCanceled: 6804000,
+        contractsCanceled: 10,
+        vgvNet: 56296000,
+        contractsNet: 72,
+        ticketAverage: 769512,
+      },
+      bruno: {
+        id: 'bruno',
+        name: 'Equipe Bruno',
+        leader: 'Bruno Torrano',
+        segment: 'Médio / Alto Padrão Urbano',
+        leads: 480,
+        analyzedDocs: 168,
+        vgvGross: 19600000,
+        contractsGross: 28,
+        vgvCanceled: 1960000,
+        contractsCanceled: 3,
+        vgvNet: 17640000,
+        contractsNet: 25,
+        ticketAverage: 700000,
+      },
+      lorena: {
+        id: 'lorena',
+        name: 'Equipe Lorena',
+        leader: 'Lorena Vasconcelos',
+        segment: 'Lançamentos & Planta',
+        leads: 620,
+        analyzedDocs: 174,
+        vgvGross: 17050000,
+        contractsGross: 31,
+        vgvCanceled: 2728000,
+        contractsCanceled: 5,
+        vgvNet: 14322000,
+        contractsNet: 26,
+        ticketAverage: 550000,
+      },
+      lucas: {
+        id: 'lucas',
+        name: 'Equipe Lucas',
+        leader: 'Lucas Siqueira',
+        segment: 'Prime, Mansões & Condomínios',
+        leads: 310,
+        analyzedDocs: 136,
+        vgvGross: 26450000,
+        contractsGross: 23,
+        vgvCanceled: 2116000,
+        contractsCanceled: 2,
+        vgvNet: 24334000,
+        contractsNet: 21,
+        ticketAverage: 1150000,
+      }
+    };
+
+    let activeData = JSON.parse(JSON.stringify(INITIAL_DATA));
+    let currentTeam = 'all';
+
+    let chartFunnel = null;
+    let chartComparative = null;
+    let typewriterTimer = null;
+
+    function formatBRL(val, compact = false) {
+      if (val === undefined || isNaN(val)) return 'R$ 0';
+      if (compact) {
+        if (Math.abs(val) >= 1_000_000) {
+          return `R$ ${(val / 1_000_000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}M`;
+        }
+        if (Math.abs(val) >= 1_000) {
+          return `R$ ${(val / 1_000).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}k`;
+        }
+      }
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val);
+    }
+
+    function formatNumber(val) {
+      if (val === undefined || isNaN(val)) return '0';
+      return new Intl.NumberFormat('pt-BR').format(val);
+    }
+
+    function formatPercent(val) {
+      if (val === undefined || isNaN(val)) return '0.0%';
+      return (val * 100).toFixed(1) + '%';
+    }
+
+    function scrollToAiSection() {
+      const el = document.getElementById('torrano-ai-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderKpis() {
+      const d = currentTeam === 'comparison' ? activeData.all : activeData[currentTeam];
+      
+      const docRate = d.leads > 0 ? (d.analyzedDocs / d.leads) : 0;
+      const effRate = d.analyzedDocs > 0 ? (d.contractsGross / d.analyzedDocs) : 0;
+      const cancelRate = d.vgvGross > 0 ? (d.vgvCanceled / d.vgvGross) : 0;
+      const retRate = d.vgvGross > 0 ? (d.vgvNet / d.vgvGross) : 0;
+      const pending = Math.max(0, d.analyzedDocs - d.contractsGross);
+
+      document.getElementById('cardLeads').innerText = formatNumber(d.leads);
+      document.getElementById('cardAnalyzedDocs').innerText = formatNumber(d.analyzedDocs);
+      document.getElementById('cardDocRate').innerText = formatPercent(docRate);
+      document.getElementById('cardDocPerLead').innerText = formatPercent(docRate);
+      document.getElementById('cardPendingApproval').innerText = formatNumber(pending);
+      document.getElementById('cardVgvGross').innerText = formatBRL(d.vgvGross, true);
+      document.getElementById('cardGrossContracts').innerText = `${formatNumber(d.contractsGross)} contratos`;
+      document.getElementById('cardTicketAverage').innerText = formatBRL(d.ticketAverage, true);
+
+      document.getElementById('cardVgvCanceled').innerText = formatBRL(d.vgvCanceled, true);
+      document.getElementById('cardCanceledContracts').innerText = `${formatNumber(d.contractsCanceled)} cancelados`;
+      document.getElementById('cardCancellationRate').innerText = formatPercent(cancelRate);
+
+      document.getElementById('cardEfficiencyRate').innerText = formatPercent(effRate);
+      document.getElementById('cardEfficiencySub').innerText = `${formatNumber(d.contractsGross)} un.`;
+
+      document.getElementById('cardVgvNet').innerText = formatBRL(d.vgvNet, true);
+      document.getElementById('cardNetContracts').innerText = `${formatNumber(d.contractsNet)} contratos retidos`;
+      document.getElementById('cardRetentionRate').innerText = formatPercent(retRate);
+
+      const topLabel = document.getElementById('topbarViewLabel');
+      if (topLabel) topLabel.innerText = currentTeam === 'comparison' ? 'Comparativo Direto' : d.name;
+      const fBadge = document.getElementById('funnelTeamBadge');
+      if (fBadge) fBadge.innerText = currentTeam === 'comparison' ? 'Comparativo' : d.name;
+      const gConv = document.getElementById('funnelGlobalConv');
+      if (gConv) gConv.innerText = `${formatPercent(d.leads > 0 ? d.contractsNet / d.leads : 0)} (${d.contractsNet} de ${d.leads})`;
+    }
+
+    function renderMatrixTable() {
+      const tbody = document.getElementById('matrixTableBody');
+      const teams = [activeData.bruno, activeData.lorena, activeData.lucas];
+      const all = activeData.all;
+
+      let html = '';
+      teams.forEach(t => {
+        const isSelected = currentTeam === t.id;
+        const docRate = t.leads > 0 ? t.analyzedDocs / t.leads : 0;
+        const cancelRate = t.vgvGross > 0 ? t.vgvCanceled / t.vgvGross : 0;
+        const retRate = t.vgvGross > 0 ? t.vgvNet / t.vgvGross : 0;
+
+        html += `
+          <tr class="hover:bg-slate-800/50 transition-colors ${isSelected ? 'bg-slate-800/80' : ''}">
+            <td class="py-3 px-4 font-sans">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full ${t.id === 'bruno' ? 'bg-blue-400' : (t.id === 'lorena' ? 'bg-amber-400' : 'bg-emerald-400')}"></span>
+                <div>
+                  <span class="font-bold text-white">${t.name}</span>
+                  <div class="text-[10px] text-[#94A3B8] font-normal">${t.segment} · <span class="text-slate-300">${t.leader}</span></div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-3 text-right text-slate-300">${formatNumber(t.leads)}</td>
+            <td class="py-3 px-3 text-right text-white font-semibold">${formatNumber(t.analyzedDocs)}</td>
+            <td class="py-3 px-3 text-right text-[#00D2FF] font-semibold">${formatPercent(docRate)}</td>
+            <td class="py-3 px-3 text-right text-white font-bold">${formatBRL(t.vgvGross)}</td>
+            <td class="py-3 px-3 text-right text-slate-300">${formatNumber(t.contractsGross)}</td>
+            <td class="py-3 px-3 text-right text-[#E60000] font-bold">${formatBRL(t.vgvCanceled)}</td>
+            <td class="py-3 px-3 text-right font-bold ${t.id === 'lorena' ? 'text-[#E60000] bg-red-950/40 px-1 py-0.5 rounded' : 'text-slate-300'}">
+              ${formatPercent(cancelRate)}
+            </td>
+            <td class="py-3 px-3 text-right text-emerald-400 font-black">${formatBRL(t.vgvNet)}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${t.id === 'lucas' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/40' : (t.id === 'lorena' ? 'bg-red-950/80 text-[#E60000] border border-[#E60000]/40' : 'bg-blue-950/80 text-blue-400 border border-blue-500/40')}">
+                ${formatPercent(retRate)}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+
+      // Total Row
+      const allCancel = all.vgvGross > 0 ? all.vgvCanceled / all.vgvGross : 0;
+      const allDoc = all.leads > 0 ? all.analyzedDocs / all.leads : 0;
+      const allRet = all.vgvGross > 0 ? all.vgvNet / all.vgvGross : 0;
+
+      html += `
+        <tr class="bg-black/60 font-bold border-t-2 border-[#1E2E4E]">
+          <td class="py-3 px-4 font-sans text-white">
+            <span class="text-[#E60000] font-black">TOTAL CONSOLIDADO</span> (TORRANO)
+          </td>
+          <td class="py-3 px-3 text-right text-white">${formatNumber(all.leads)}</td>
+          <td class="py-3 px-3 text-right text-white">${formatNumber(all.analyzedDocs)}</td>
+          <td class="py-3 px-3 text-right text-[#00D2FF]">${formatPercent(allDoc)}</td>
+          <td class="py-3 px-3 text-right text-white">${formatBRL(all.vgvGross)}</td>
+          <td class="py-3 px-3 text-right text-white">${formatNumber(all.contractsGross)}</td>
+          <td class="py-3 px-3 text-right text-[#E60000]">${formatBRL(all.vgvCanceled)}</td>
+          <td class="py-3 px-3 text-right text-[#E60000]">${formatPercent(allCancel)}</td>
+          <td class="py-3 px-3 text-right text-emerald-400 font-black text-sm">${formatBRL(all.vgvNet)}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-black bg-emerald-500 text-black">
+              ${formatPercent(allRet)}
+            </span>
+          </td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+    }
+
+    function initCharts() {
+      Chart.defaults.color = '#94A3B8';
+      Chart.defaults.borderColor = '#1E2E4E';
+      Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+
+      // 1. Funnel Bar Chart
+      const ctxFunnel = document.getElementById('funnelCanvas').getContext('2d');
+      chartFunnel = new Chart(ctxFunnel, {
+        type: 'bar',
+        data: getFunnelData(),
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#090E17',
+              borderColor: '#1E2E4E',
+              borderWidth: 1,
+              callbacks: {
+                label: (ctx) => ` Volume: ${ctx.raw.toLocaleString('pt-BR')} unidades`
+              }
+            }
+          },
+          scales: {
+            x: { grid: { color: '#1E2E4E' } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+
+      // 2. Comparative Grouped Bar
+      const ctxComp = document.getElementById('comparativeCanvas').getContext('2d');
+      chartComparative = new Chart(ctxComp, {
+        type: 'bar',
+        data: getComparativeData(),
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { 
+                boxWidth: 12, 
+                padding: 16, 
+                color: '#CBD5E1',
+                font: { size: 11, weight: 'bold' } 
+              }
+            },
+            tooltip: {
+              backgroundColor: '#090E17',
+              borderColor: '#1E2E4E',
+              borderWidth: 1,
+              titleColor: '#FFFFFF',
+              titleFont: { size: 12, weight: 'bold' },
+              bodyColor: '#CBD5E1',
+              bodyFont: { size: 11, family: "'JetBrains Mono', monospace" },
+              padding: 10,
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: ${formatBRL(ctx.raw, false)}`
+              }
+            }
+          },
+          scales: {
+            x: { 
+              grid: { display: false },
+              ticks: { 
+                color: '#E2E8F0',
+                font: { size: 12, weight: 'bold' },
+                maxRotation: 0,
+                autoSkip: false,
+                padding: 8
+              }
+            },
+            y: {
+              ticks: { 
+                callback: (v) => formatBRL(v, true),
+                color: '#94A3B8',
+                font: { size: 10 }
+              },
+              grid: { color: '#1E2E4E' }
+            }
+          }
+        }
+      });
+    }
+
+    function getFunnelData() {
+      const d = currentTeam === 'comparison' ? activeData.all : activeData[currentTeam];
+      return {
+        labels: ['1. Leads', '2. Pastas', '3. Brutas', '4. Líquidas'],
+        datasets: [{
+          data: [d.leads, d.analyzedDocs, d.contractsGross, d.contractsNet],
+          backgroundColor: ['#1D68FF', '#00D2FF', '#10B981', '#059669'],
+          borderRadius: 6,
+        }]
+      };
+    }
+
+    function getComparativeData() {
+      const b = activeData.bruno;
+      const l = activeData.lorena;
+      const luc = activeData.lucas;
+
+      return {
+        labels: ['Equipe Bruno', 'Equipe Lorena', 'Equipe Lucas'],
+        datasets: [
+          {
+            label: 'Vendas Brutas',
+            data: [b.vgvGross, l.vgvGross, luc.vgvGross],
+            backgroundColor: '#1D68FF',
+            borderRadius: 6,
+          },
+          {
+            label: 'Vendas Líquidas',
+            data: [b.vgvNet, l.vgvNet, luc.vgvNet],
+            backgroundColor: '#10B981',
+            borderRadius: 6,
+          },
+          {
+            label: 'Destratos',
+            data: [b.vgvCanceled, l.vgvCanceled, luc.vgvCanceled],
+            backgroundColor: '#E60000',
+            borderRadius: 6,
+          }
+        ]
+      };
+    }
+
+    function updateCharts() {
+      if (!chartFunnel || !chartComparative) return;
+      chartFunnel.data = getFunnelData();
+      chartFunnel.update();
+
+      chartComparative.data = getComparativeData();
+      chartComparative.update();
+
+      // Update explanatory cards below the comparative chart
+      const b = activeData.bruno;
+      const l = activeData.lorena;
+      const luc = activeData.lucas;
+      const elBNet = document.getElementById('compBrunoNet');
+      const elBCancel = document.getElementById('compBrunoCancel');
+      const elLNet = document.getElementById('compLorenaNet');
+      const elLCancel = document.getElementById('compLorenaCancel');
+      const elLucNet = document.getElementById('compLucasNet');
+      const elLucCancel = document.getElementById('compLucasCancel');
+
+      if (elBNet) elBNet.innerText = formatBRL(b.vgvNet);
+      if (elBCancel) elBCancel.innerText = `${formatBRL(b.vgvCanceled)} (${formatPercent(b.vgvGross > 0 ? b.vgvCanceled / b.vgvGross : 0)})`;
+      if (elLNet) elLNet.innerText = formatBRL(l.vgvNet);
+      if (elLCancel) elLCancel.innerText = `${formatBRL(l.vgvCanceled)} (${formatPercent(l.vgvGross > 0 ? l.vgvCanceled / l.vgvGross : 0)})`;
+      if (elLucNet) elLucNet.innerText = formatBRL(luc.vgvNet);
+      if (elLucCancel) elLucCancel.innerText = `${formatBRL(luc.vgvCanceled)} (${formatPercent(luc.vgvGross > 0 ? luc.vgvCanceled / luc.vgvGross : 0)})`;
+    }
+
+    function setTeamView(teamId) {
+      currentTeam = teamId;
+
+      // 1. Sync header navigation tabs
+      document.querySelectorAll('.team-tab').forEach(btn => {
+        btn.className = 'team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60';
+      });
+      const activeTab = document.getElementById(`tab-${teamId}`);
+      if (activeTab) {
+        activeTab.className = 'team-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide bg-slate-900 text-white shadow-[0_0_15px_rgba(230,0,0,0.4)] border-2 border-[#E60000] ring-1 ring-[#E60000]/60';
+      }
+
+      // 2. Sync secondary pills row
+      document.querySelectorAll('.team-pill').forEach(btn => {
+        btn.className = 'team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide text-slate-400 hover:text-white hover:bg-slate-800/60 border border-[#1E2E4E]/60';
+      });
+      const activePill = document.getElementById(`pill-${teamId}`);
+      if (activePill) {
+        activePill.className = 'team-pill flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer font-display tracking-wide bg-slate-900 text-white shadow-[0_0_15px_rgba(230,0,0,0.4)] border-2 border-[#E60000] ring-1 ring-[#E60000]/60';
+      }
+
+      // 3. Dynamic Banner Titles & Badges
+      const elBadgeText = document.getElementById('heroBadgeText');
+      const elTitle = document.getElementById('heroTitle');
+      const elSubtitle = document.getElementById('heroSubtitle');
+
+      if (teamId === 'bruno') {
+        if (elBadgeText) elBadgeText.innerText = '👤 LIDERANÇA COMERCIAL • MÉDIO / ALTO PADRÃO';
+        if (elTitle) elTitle.innerText = 'Painel de Performance • Equipe Bruno';
+        if (elSubtitle) elSubtitle.innerText = 'Liderança: Bruno Torrano • Métricas exclusivas de prospecção, pastas em análise e retenção de caixa.';
+      } else if (teamId === 'lorena') {
+        if (elBadgeText) elBadgeText.innerText = '👤 LIDERANÇA COMERCIAL • LANÇAMENTOS E INVESTIDORES';
+        if (elTitle) elTitle.innerText = 'Painel de Performance • Equipe Lorena';
+        if (elSubtitle) elSubtitle.innerText = 'Liderança: Lorena Vasconcelos • Métricas exclusivas de fluxo de lançamentos, pastas montadas e velocidade de vendas.';
+      } else if (teamId === 'lucas') {
+        if (elBadgeText) elBadgeText.innerText = '👤 LIDERANÇA COMERCIAL • PRIME & MANSÕES';
+        if (elTitle) elTitle.innerText = 'Painel de Performance • Equipe Lucas';
+        if (elSubtitle) elSubtitle.innerText = 'Liderança: Lucas Siqueira • Métricas exclusivas de alto ticket, esteira bancária e fechamentos de alta retenção.';
+      } else if (teamId === 'comparison') {
+        if (elBadgeText) elBadgeText.innerText = '⚡ WAR ROOM EXECUTIVO • REUNIÃO DE ALINHAMENTO GERAL';
+        if (elTitle) elTitle.innerText = 'War Room Estratégico • Comparativo Geral de Equipes';
+        if (elSubtitle) elSubtitle.innerText = 'Benchmarking direto, ranking de conversão e disputa de metas entre Bruno Torrano, Lorena Vasconcelos e Lucas Siqueira.';
+      } else {
+        if (elBadgeText) elBadgeText.innerText = '🏢 DIRETORIA GERAL • VISÃO CONSOLIDADA';
+        if (elTitle) elTitle.innerText = 'Painel Executivo Flávio Torrano';
+        if (elSubtitle) elSubtitle.innerText = 'Acompanhamento consolidado de VGV, fluxo de documentos, destratos e desempenho corporativo global.';
+      }
+
+      // 4. Strict Isolation and Shielding of Blocks
+      const isComparison = teamId === 'comparison';
+      const funnelCard = document.getElementById('funnelCard');
+      const comparativeBlock = document.getElementById('comparativeBlock');
+      const isolatedShieldBlock = document.getElementById('isolatedShieldBlock');
+      const matrixTableContainer = document.getElementById('matrixTableContainer');
+
+      if (isComparison) {
+        if (funnelCard) funnelCard.className = 'lg:col-span-5 bg-[#111C32]/90 border border-[#1E2E4E] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4';
+        if (comparativeBlock) comparativeBlock.classList.remove('hidden');
+        if (isolatedShieldBlock) isolatedShieldBlock.classList.add('hidden');
+        if (matrixTableContainer) matrixTableContainer.classList.remove('hidden');
+      } else {
+        if (funnelCard) funnelCard.className = 'lg:col-span-6 bg-[#111C32]/90 border border-[#1E2E4E] rounded-2xl p-5 shadow-xl flex flex-col justify-between space-y-4';
+        if (comparativeBlock) comparativeBlock.classList.add('hidden');
+        if (isolatedShieldBlock) isolatedShieldBlock.classList.remove('hidden');
+        if (matrixTableContainer) matrixTableContainer.classList.add('hidden');
+
+        // Populate isolated single-team shield card
+        const d = teamId === 'all' ? activeData.all : activeData[teamId];
+        const elShieldTeam = document.getElementById('shieldBlockTeam');
+        if (elShieldTeam) elShieldTeam.innerText = d.name;
+        document.getElementById('shieldVgvNet').innerText = formatBRL(d.vgvNet, true);
+        document.getElementById('shieldNetContracts').innerText = `${d.contractsNet} contratos mantidos (${formatPercent(d.vgvGross > 0 ? d.vgvNet / d.vgvGross : 0)} de retenção)`;
+        document.getElementById('shieldVgvCanceled').innerText = formatBRL(d.vgvCanceled, true);
+        document.getElementById('shieldCanceledContracts').innerText = `${d.contractsCanceled} quebras (${formatPercent(d.vgvGross > 0 ? d.vgvCanceled / d.vgvGross : 0)})`;
+        document.getElementById('shieldVgvGross').innerText = formatBRL(d.vgvGross, true);
+        document.getElementById('shieldGrossContracts').innerText = `${d.contractsGross} contratos formalizados`;
+        document.getElementById('shieldTicketAvg').innerText = formatBRL(d.ticketAverage, true);
+        document.getElementById('shieldAnalyzedDocs').innerText = `${d.analyzedDocs} pastas qualificadas`;
+        document.getElementById('shieldTargetVal').innerText = formatBRL(d.targetNet, true);
+        document.getElementById('shieldTargetAchieved').innerText = `${((d.vgvNet / d.targetNet) * 100).toFixed(1)}% atingido`;
+        const pBar = document.getElementById('shieldProgressBar');
+        if (pBar) pBar.style.width = `${Math.min(100, (d.vgvNet / d.targetNet) * 100)}%`;
+      }
+
+      // Funnel Title
+      const d = teamId === 'comparison' ? activeData.all : activeData[teamId];
+      const fnTitle = document.getElementById('funnelTitleTeam');
+      if (fnTitle) fnTitle.innerText = teamId === 'comparison' ? 'Comparativo War Room' : d.name;
+
+      renderKpis();
+      if (isComparison) renderMatrixTable();
+      updateCharts();
+      renderPillars();
+    }
+
+    function renderPillars() {
+      const b = activeData.bruno;
+      const l = activeData.lorena;
+      const luc = activeData.lucas;
+      const all = activeData.all;
+
+      if (currentTeam === 'bruno') {
+        const cancelRate = b.vgvGross > 0 ? (b.vgvCanceled / b.vgvGross) : 0;
+        const docRate = b.leads > 0 ? (b.analyzedDocs / b.leads) : 0;
+        document.getElementById('aiPillar1').innerHTML = `
+          <p><strong class="text-white">Retenção de Caixa:</strong> VGV Líquido retido de <strong class="text-emerald-400">${formatBRL(b.vgvNet)}</strong> (${b.contractsNet} contratos mantidos).</p>
+          <p><strong class="text-[#E60000]">• Destratos:</strong> Quebra de <strong class="text-[#E60000]">${formatPercent(cancelRate)}</strong> (${formatBRL(b.vgvCanceled)} perdidos em ${b.contractsCanceled} rescisões contratuais).</p>
+        `;
+        document.getElementById('aiPillar2').innerHTML = `
+          <p><strong class="text-white">Qualificação:</strong> De <strong class="text-white">${b.leads} leads recebidos</strong>, <strong class="text-[#00D2FF]">${b.analyzedDocs} pastas</strong> foram qualificadas (${formatPercent(docRate)}).</p>
+          <p><strong class="text-[#00D2FF]">• Ticket Médio:</strong> ${formatBRL(b.ticketAverage)} por venda em Médio/Alto Padrão.</p>
+        `;
+        document.getElementById('aiPillar3').innerHTML = `
+          <ol class="space-y-1 list-decimal list-inside text-slate-200">
+            <li><strong class="text-white">Auditoria Prévia de Entrada:</strong> Exigir comprovação de liquidez antes da assinatura da minuta.</li>
+            <li><strong class="text-white">Aceleração de Pastas (72h):</strong> SLA rígido com correspondentes para os ${b.analyzedDocs} processos.</li>
+            <li><strong class="text-white">Meta de Destrato:</strong> Reduzir taxa atual de ${formatPercent(cancelRate)} para o teto de 10%.</li>
+          </ol>
+        `;
+        return;
+      }
+
+      if (currentTeam === 'lorena') {
+        const cancelRate = l.vgvGross > 0 ? (l.vgvCanceled / l.vgvGross) : 0;
+        const docRate = l.leads > 0 ? (l.analyzedDocs / l.leads) : 0;
+        document.getElementById('aiPillar1').innerHTML = `
+          <p><strong class="text-white">Retenção de Caixa:</strong> VGV Líquido retido de <strong class="text-amber-400">${formatBRL(l.vgvNet)}</strong> (${l.contractsNet} contratos mantidos).</p>
+          <p><strong class="text-[#E60000]">• Destratos:</strong> Quebra de <strong class="text-[#E60000]">${formatPercent(cancelRate)}</strong> (${formatBRL(l.vgvCanceled)} perdidos em ${l.contractsCanceled} quebras na planta).</p>
+        `;
+        document.getElementById('aiPillar2').innerHTML = `
+          <p><strong class="text-white">Volume de Lançamentos:</strong> Captação massiva de <strong class="text-white">${l.leads} leads</strong>, com <strong class="text-[#00D2FF]">${l.analyzedDocs} pastas</strong> montadas (${formatPercent(docRate)}).</p>
+          <p><strong class="text-amber-400">• Gargalo:</strong> Reprovação tardia de financiamento bancário associativo.</p>
+        `;
+        document.getElementById('aiPillar3').innerHTML = `
+          <ol class="space-y-1 list-decimal list-inside text-slate-200">
+            <li><strong class="text-white">Plantão de Crédito nos Stands:</strong> Alocar correspondente presencial no lançamento.</li>
+            <li><strong class="text-white">Higienização dos Leads:</strong> Focar nos clientes com entrada superior a 20%.</li>
+            <li><strong class="text-white">Estanqueidade de Cancelamentos:</strong> Bloquear contratos sem aprovação prévia em 48h.</li>
+          </ol>
+        `;
+        return;
+      }
+
+      if (currentTeam === 'lucas') {
+        const cancelRate = luc.vgvGross > 0 ? (luc.vgvCanceled / luc.vgvGross) : 0;
+        const docRate = luc.leads > 0 ? (luc.analyzedDocs / luc.leads) : 0;
+        document.getElementById('aiPillar1').innerHTML = `
+          <p><strong class="text-white">Retenção de Caixa:</strong> VGV Líquido retido de <strong class="text-emerald-400">${formatBRL(luc.vgvNet)}</strong> (${luc.contractsNet} contratos).</p>
+          <p><strong class="text-emerald-400">• Blindagem de Destrato:</strong> Apenas <strong class="text-emerald-400">${formatPercent(cancelRate)}</strong> (${formatBRL(luc.vgvCanceled)} em ${luc.contractsCanceled} quebra isolada).</p>
+        `;
+        document.getElementById('aiPillar2').innerHTML = `
+          <p><strong class="text-white">Eficiência Prime:</strong> De <strong class="text-white">${luc.leads} leads seletos</strong>, <strong class="text-[#00D2FF]">${luc.analyzedDocs} pastas</strong> montadas (${formatPercent(docRate)}).</p>
+          <p><strong class="text-emerald-400">• Ticket Médio Recorde:</strong> ${formatBRL(luc.ticketAverage)} por negócio em Mansões e Prime.</p>
+        `;
+        document.getElementById('aiPillar3').innerHTML = `
+          <ol class="space-y-1 list-decimal list-inside text-slate-200">
+            <li><strong class="text-white">Captação Off-Market:</strong> Expandir imóveis exclusivos acima de R$ 3M.</li>
+            <li><strong class="text-white">Documentar Método:</strong> Multiplicar o checklist de qualificação da equipe para os demais líderes.</li>
+            <li><strong class="text-white">Member Get Member:</strong> Indicação ativa com a base compradora de alto patrimônio.</li>
+          </ol>
+        `;
+        return;
+      }
+
+      if (currentTeam === 'all') {
+        const cancelRate = all.vgvGross > 0 ? (all.vgvCanceled / all.vgvGross) : 0;
+        const docRate = all.leads > 0 ? (all.analyzedDocs / all.leads) : 0;
+        document.getElementById('aiPillar1').innerHTML = `
+          <p><strong class="text-white">Caixa Geral Corporativo:</strong> VGV Líquido retido de <strong class="text-emerald-400">${formatBRL(all.vgvNet)}</strong> (${all.contractsNet} contratos retidos).</p>
+          <p><strong class="text-[#E60000]">• Destratos Globais:</strong> Montante total cancelado de <strong class="text-[#E60000]">${formatBRL(all.vgvCanceled)} (${formatPercent(cancelRate)})</strong>.</p>
+        `;
+        document.getElementById('aiPillar2').innerHTML = `
+          <p><strong class="text-white">Funil Consolidado:</strong> <strong class="text-white">${formatNumber(all.leads)} leads</strong> captados e <strong class="text-[#00D2FF]">${formatNumber(all.analyzedDocs)} pastas</strong> montadas (${formatPercent(docRate)}).</p>
+          <p><strong class="text-slate-300">• Eficiência:</strong> Atingimento de ${((all.vgvNet / all.targetNet) * 100).toFixed(1)}% da meta corporativa.</p>
+        `;
+        document.getElementById('aiPillar3').innerHTML = `
+          <ol class="space-y-1 list-decimal list-inside text-slate-200">
+            <li><strong class="text-white">Esteira Pré-Bancária Corporativa:</strong> Bloquear contratos sem laudo bancário prévio.</li>
+            <li><strong class="text-white">Auditoria das ${all.analyzedDocs} Pastas:</strong> Mutirão para destravar processos bancários parados.</li>
+            <li><strong class="text-white">Governança Financeira:</strong> Teto máximo de 10% de destrato para premiações.</li>
+          </ol>
+        `;
+        return;
+      }
+
+      // Comparison / War Room Mode
+      const cancelRate = all.vgvGross > 0 ? (all.vgvCanceled / all.vgvGross) : 0;
+      const lCancelRate = l.vgvGross > 0 ? (l.vgvCanceled / l.vgvGross) : 0;
+      const lucRetRate = luc.vgvGross > 0 ? (luc.vgvNet / luc.vgvGross) : 0;
+      const docRate = all.leads > 0 ? (all.analyzedDocs / all.leads) : 0;
+
+      document.getElementById('aiPillar1').innerHTML = `
+        <p><strong class="text-white">Impacto no Caixa:</strong> De <strong class="text-white">${formatBRL(all.vgvGross)}</strong> emitidos, <strong class="text-[#E60000]">${formatBRL(all.vgvCanceled)} (${formatPercent(cancelRate)})</strong> foram cancelados.</p>
+        <p><strong class="text-[#E60000]">• Alerta Lorena:</strong> Quebra de <strong class="text-[#E60000]">${formatPercent(lCancelRate)}</strong> (${formatBRL(l.vgvCanceled)}). Reprovação de crédito tardia na planta.</p>
+        <p><strong class="text-emerald-400">• Benchmark Lucas:</strong> Retenção de <strong class="text-emerald-400">${formatPercent(lucRetRate)}</strong> (${formatBRL(luc.vgvNet)} líquidos em prime).</p>
+      `;
+
+      document.getElementById('aiPillar2').innerHTML = `
+        <p><strong class="text-white">Qualificação de Leads:</strong> De <strong class="text-white">${formatNumber(all.leads)} contatos</strong>, <strong class="text-[#00D2FF]">${formatNumber(all.analyzedDocs)} (${formatPercent(docRate)})</strong> montaram pastas documentais.</p>
+        <p><strong class="text-white">• Maior Qualificação:</strong> Lucas converte <strong class="text-emerald-400">${formatPercent(luc.leads > 0 ? luc.analyzedDocs / luc.leads : 0)}</strong> de seus leads.</p>
+        <p><strong class="text-amber-400">• Gargalo Lorena:</strong> Alto volume (${l.leads} leads), porém apenas <strong class="text-amber-400">${formatPercent(l.leads > 0 ? l.analyzedDocs / l.leads : 0)}</strong> formalizam pasta.</p>
+      `;
+
+      document.getElementById('aiPillar3').innerHTML = `
+        <ol class="space-y-1 list-decimal list-inside text-slate-200">
+          <li><strong class="text-white">Esteira Pré-Bancária (48h):</strong> Bloquear contratos na Lorena sem aprovação prévia de crédito.</li>
+          <li><strong class="text-white">Higienização das ${all.analyzedDocs} Pastas:</strong> Filtrar cadastros e priorizar clientes com entrada imediata.</li>
+          <li><strong class="text-white">Pacto de Retenção Mínima de 90%:</strong> Vincular bonificação a teto de 10% de destrato.</li>
+        </ol>
+      `;
+    }
+
+    function typeWriter(text) {
+      if (typewriterTimer) clearInterval(typewriterTimer);
+      const el = document.getElementById('aiTerminalText');
+      el.innerText = '';
+      let i = 0;
+      typewriterTimer = setInterval(() => {
+        if (i < text.length) {
+          el.innerText += text.charAt(i);
+          i++;
+        } else {
+          clearInterval(typewriterTimer);
+          typewriterTimer = null;
+        }
+      }, 4);
+    }
+
+    function processAiReport() {
+      const all = activeData.all;
+      const b = activeData.bruno;
+      const l = activeData.lorena;
+      const luc = activeData.lucas;
+
+      let report = '';
+
+      if (currentTeam === 'bruno') {
+        report = `PARECER TÁTICO BLINDADO — EQUIPE BRUNO (LÍDER: BRUNO TORRANO)
+
+1. DIAGNÓSTICO DE RETENÇÃO DE CAIXA E DESTRATOS:
+A Equipe Bruno formalizou ${formatBRL(b.vgvGross, false)} em vendas brutas com ${b.contractsGross} contratos emitidos. O Caixa Líquido Efetivo retido é de ${formatBRL(b.vgvNet, false)} (${b.contractsNet} contratos mantidos), alcançando ${((b.vgvNet / b.targetNet) * 100).toFixed(1)}% da meta de ${formatBRL(b.targetNet, false)}.
+Os cancelamentos totalizaram ${formatBRL(b.vgvCanceled, false)} (${b.contractsCanceled} quebras), representando ${formatPercent(b.vgvGross > 0 ? b.vgvCanceled / b.vgvGross : 0)} de perda sobre o bruto.
+
+2. FLUXO DO FUNIL E QUALIFICAÇÃO DE PASTAS:
+- Leads Recebidos: ${b.leads} contatos direcionados para médio/alto padrão.
+- Pastas Documentais Analisadas: ${b.analyzedDocs} montadas (conversão de ${formatPercent(b.leads > 0 ? b.analyzedDocs / b.leads : 0)}).
+- Ticket Médio por Venda: ${formatBRL(b.ticketAverage, false)}.
+
+3. 3 AÇÕES TÁTICAS PARA ALINHAMENTO COM BRUNO TORRANO:
+1. Auditoria Prévia de Entrada: Exigir comprovante de disponibilidade financeira para o sinal antes da emissão contratual.
+2. Aceleração das ${b.analyzedDocs} Pastas: SLA de 72h com os correspondentes bancários credenciados.
+3. Foco em Fechamentos com FGTS/Recursos Próprios para garantir liquidação no mês corrente.`;
+      } else if (currentTeam === 'lorena') {
+        report = `PARECER TÁTICO BLINDADO — EQUIPE LORENA (LÍDER: LORENA VASCONCELOS)
+
+1. DIAGNÓSTICO DE RETENÇÃO DE CAIXA E DESTRATOS:
+A Equipe Lorena registrou ${formatBRL(l.vgvGross, false)} em VGV Bruto emitido em ${l.contractsGross} contratos. O Caixa Líquido Retido somou ${formatBRL(l.vgvNet, false)} (${l.contractsNet} contratos ativos), atingindo ${((l.vgvNet / l.targetNet) * 100).toFixed(1)}% da meta de ${formatBRL(l.targetNet, false)}.
+As rescisões atingiram ${formatBRL(l.vgvCanceled, false)} (${l.contractsCanceled} quebras na planta), gerando taxa de destrato de ${formatPercent(l.vgvGross > 0 ? l.vgvCanceled / l.vgvGross : 0)}.
+
+2. FLUXO DO FUNIL E QUALIFICAÇÃO DE PASTAS:
+- Leads Recebidos: ${l.leads} contatos em lançamentos e investidores.
+- Pastas Documentais Analisadas: ${l.analyzedDocs} montadas (conversão documental de ${formatPercent(l.leads > 0 ? l.analyzedDocs / l.leads : 0)}).
+- Ticket Médio por Venda: ${formatBRL(l.ticketAverage, false)}.
+
+3. 3 AÇÕES TÁTICAS PARA ALINHAMENTO COM LORENA VASCONCELOS:
+1. Plantão de Correspondente nos Stands: Analista de crédito presencial para pré-aprovar antes da proposta.
+2. Higienização dos ${l.leads} Contatos: Priorizar investidores com histórico positivo de adimplência.
+3. Plano de Redução de Quebras para 10%: Vincular bonificação à liquidação sem desistência nos primeiros 60 dias.`;
+      } else if (currentTeam === 'lucas') {
+        report = `PARECER TÁTICO BLINDADO — EQUIPE LUCAS (LÍDER: LUCAS SIQUEIRA)
+
+1. DIAGNÓSTICO DE RETENÇÃO DE CAIXA E DESTRATOS:
+A Equipe Lucas entregou performance de alto padrão, alcançando ${formatBRL(luc.vgvGross, false)} em VGV Bruto emitido em ${luc.contractsGross} contratos.
+Os cancelamentos foram praticamente inexistentes: apenas ${formatBRL(luc.vgvCanceled, false)} (${luc.contractsCanceled} quebra), correspondendo a uma taxa ínfima de ${formatPercent(luc.vgvGross > 0 ? luc.vgvCanceled / luc.vgvGross : 0)}.
+O Caixa Líquido Efetivo atingiu ${formatBRL(luc.vgvNet, false)}, superando a meta de ${formatBRL(luc.targetNet, false)} em ${((luc.vgvNet / luc.targetNet) * 100).toFixed(1)}%.
+
+2. FLUXO DO FUNIL E QUALIFICAÇÃO DE PASTAS:
+- Leads Recebidos: ${luc.leads} contatos altamente qualificados.
+- Pastas Documentais Analisadas: ${luc.analyzedDocs} estruturadas (conversão de ${formatPercent(luc.leads > 0 ? luc.analyzedDocs / luc.leads : 0)}).
+- Ticket Médio por Venda: ${formatBRL(luc.ticketAverage, false)} (Liderança em Prime & Mansões).
+
+3. 3 AÇÕES TÁTICAS PARA ALINHAMENTO COM LUCAS SIQUEIRA:
+1. Captação de Novos Produtos Off-Market: Expandir portfólio de imóveis acima de R$ 3M.
+2. Documentação do Método: Formalizar o checklist de qualificação da equipe como padrão corporativo.
+3. Programa de Indicação Ativa (Member Get Member) junto aos clientes de alto patrimônio.`;
+      } else if (currentTeam === 'all') {
+        report = `PARECER ESTRATÉGICO CORPORATIVO — DIRETORIA GERAL FLÁVIO TORRANO
+
+1. VISÃO GERAL DE CAIXA E RETENÇÃO CORPORATIVA:
+Prezado Flávio Torrano, a Torrano Negócios Imobiliários atingiu um VGV Bruto emitido de ${formatBRL(all.vgvGross, false)} em ${all.contractsGross} contratos. Os destratos globais somaram ${formatBRL(all.vgvCanceled, false)} (${all.contractsCanceled} quebras acumuladas), taxa de ${formatPercent(all.vgvGross > 0 ? all.vgvCanceled / all.vgvGross : 0)}.
+O Caixa Líquido Real em Caixa atingiu ${formatBRL(all.vgvNet, false)} (${all.contractsNet} contratos mantidos), atingindo ${((all.vgvNet / all.targetNet) * 100).toFixed(1)}% da meta corporativa de ${formatBRL(all.targetNet, false)}.
+
+2. OPERAÇÃO GLOBAL E GARGALOS:
+- Leads Globais Recebidos: ${formatNumber(all.leads)}
+- Pastas Documentais Analisadas: ${formatNumber(all.analyzedDocs)} (conversão de ${formatPercent(all.leads > 0 ? all.analyzedDocs / all.leads : 0)})
+- Ticket Médio Consolidado: ${formatBRL(all.ticketAverage, false)}
+
+3. 3 DECISÕES EXECUTIVAS PARA FLÁVIO TORRANO:
+1. Esteira Pré-Bancária Obrigatória: Vedar promessas de compra e venda sem laudo de crédito bancário.
+2. Mutirão na Secretaria de Vendas para auditar as ${all.analyzedDocs} pastas em trânsito.
+3. Governança de Premiações: Condicionar bônus de liderança ao teto de 10% de destrato acumulado.`;
+      } else {
+        report = `PARECER TÁTICO ESTRATÉGICO — WAR ROOM (ALINHAMENTO GERAL DE EQUIPES)
+
+1. RANKING COMPARATIVO DE RETENÇÃO E DESTRATOS:
+- 🏆 1º Lugar em Retenção: Equipe Lucas (Lucas Siqueira) retém ${formatPercent(luc.vgvGross > 0 ? luc.vgvNet / luc.vgvGross : 0)} do VGV (${formatBRL(luc.vgvNet, false)} líquidos) com taxa de destrato mínima de ${formatPercent(luc.vgvGross > 0 ? luc.vgvCanceled / luc.vgvGross : 0)}.
+- ⚖️ 2º Lugar: Equipe Bruno (Bruno Torrano) sustenta ${formatBRL(b.vgvNet, false)} líquidos com destratos de ${formatBRL(b.vgvCanceled, false)} (${formatPercent(b.vgvGross > 0 ? b.vgvCanceled / b.vgvGross : 0)}).
+- ⚠️ Ponto Crítico de Atenção: Equipe Lorena (Lorena Vasconcelos) apresenta a maior perda (${formatPercent(l.vgvGross > 0 ? l.vgvCanceled / l.vgvGross : 0)}), totalizando ${formatBRL(l.vgvCanceled, false)} cancelados na planta.
+
+2. EFICIÊNCIA COMPARADA DA ESTEIRA DOCUMENTAL:
+- Lucas: ${luc.analyzedDocs} pastas de ${luc.leads} leads (${formatPercent(luc.leads > 0 ? luc.analyzedDocs / luc.leads : 0)}) • Ticket: ${formatBRL(luc.ticketAverage, false)}
+- Bruno: ${b.analyzedDocs} pastas de ${b.leads} leads (${formatPercent(b.leads > 0 ? b.analyzedDocs / b.leads : 0)}) • Ticket: ${formatBRL(b.ticketAverage, false)}
+- Lorena: ${l.analyzedDocs} pastas de ${l.leads} leads (${formatPercent(l.leads > 0 ? l.analyzedDocs / l.leads : 0)}) • Ticket: ${formatBRL(l.ticketAverage, false)}
+
+3. PAUTA OFICIAL DA REUNIÃO COM OS 3 LÍDERES:
+1. Fixação do teto máximo de 10% de destrato como compromisso inegociável para Bruno e Lorena.
+2. Disseminação do checklist pré-bancário da Equipe Lucas para as demais lideranças.
+3. Desafio conjunto de sustentação do VGV Líquido corporativo acima de R$ 50M.`;
+      }
+
+      typeWriter(report);
+      renderPillars();
+    }
+
+    function copyAiReport() {
+      const text = document.getElementById('aiTerminalText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtnText');
+        btn.innerText = '✓ Copiado!';
+        setTimeout(() => btn.innerText = '📋 Copiar', 2000);
+      });
+    }
+
+    function handleExcelUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+
+          if (!rows || rows.length === 0) throw new Error('Planilha vazia.');
+
+          const updated = JSON.parse(JSON.stringify(INITIAL_DATA));
+
+          rows.forEach(r => {
+            const raw = String(r.Equipe || r.equipe || '').toLowerCase();
+            let key = null;
+            if (raw.includes('bruno')) key = 'bruno';
+            else if (raw.includes('lorena')) key = 'lorena';
+            else if (raw.includes('lucas')) key = 'lucas';
+
+            if (key) {
+              const t = updated[key];
+              if (r.Leads) t.leads = Number(r.Leads) || t.leads;
+              if (r.Documentos_Analisados || r.Pastas) t.analyzedDocs = Number(r.Documentos_Analisados || r.Pastas) || t.analyzedDocs;
+              if (r.Vendas_Brutas) t.vgvGross = Number(r.Vendas_Brutas) || t.vgvGross;
+              if (r.Destratos) t.vgvCanceled = Number(r.Destratos) || t.vgvCanceled;
+              if (r.Vendas_Liquidas) t.vgvNet = Number(r.Vendas_Liquidas) || (t.vgvGross - t.vgvCanceled);
+              if (r.Contratos) t.contractsGross = Number(r.Contratos) || t.contractsGross;
+              if (r.Contratos_Cancelados) t.contractsCanceled = Number(r.Contratos_Cancelados) || t.contractsCanceled;
+              t.contractsNet = Math.max(0, t.contractsGross - (t.contractsCanceled || 0));
+            }
+          });
+
+          updated.all.leads = updated.bruno.leads + updated.lorena.leads + updated.lucas.leads;
+          updated.all.analyzedDocs = updated.bruno.analyzedDocs + updated.lorena.analyzedDocs + updated.lucas.analyzedDocs;
+          updated.all.vgvGross = updated.bruno.vgvGross + updated.lorena.vgvGross + updated.lucas.vgvGross;
+          updated.all.vgvCanceled = updated.bruno.vgvCanceled + updated.lorena.vgvCanceled + updated.lucas.vgvCanceled;
+          updated.all.vgvNet = updated.bruno.vgvNet + updated.lorena.vgvNet + updated.lucas.vgvNet;
+          updated.all.contractsGross = updated.bruno.contractsGross + updated.lorena.contractsGross + updated.lucas.contractsGross;
+          updated.all.contractsCanceled = updated.bruno.contractsCanceled + updated.lorena.contractsCanceled + updated.lucas.contractsCanceled;
+          updated.all.contractsNet = updated.bruno.contractsNet + updated.lorena.contractsNet + updated.lucas.contractsNet;
+
+          activeData = updated;
+          renderKpis();
+          renderMatrixTable();
+          updateCharts();
+          renderPillars();
+          processAiReport();
+
+          document.getElementById('btnResetData').classList.remove('hidden');
+          showBanner(`Planilha "${file.name}" carregada com sucesso! VGV Líquido: ${formatBRL(activeData.all.vgvNet)}`, 'success');
+        } catch(err) {
+          showBanner('Erro ao processar planilha: ' + (err.message || 'Arquivo inválido'), 'error');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      e.target.value = '';
+    }
+
+    function downloadExcelTemplate() {
+      const wb = XLSX.utils.book_new();
+      const wsData = [
+        ['Equipe', 'Lider', 'Leads', 'Documentos_Analisados', 'Vendas_Brutas', 'Destratos', 'Vendas_Liquidas', 'Contratos', 'Contratos_Cancelados'],
+        ['Equipe Bruno', 'Bruno Torrano', 480, 168, 19600000, 1960000, 17640000, 28, 3],
+        ['Equipe Lorena', 'Lorena Vasconcelos', 620, 174, 17050000, 2728000, 14322000, 31, 5],
+        ['Equipe Lucas', 'Lucas Siqueira', 310, 136, 26450000, 2116000, 24334000, 23, 2],
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Torrano_Fechamento');
+      XLSX.writeFile(wb, 'torrano_modelo_cockpit.xlsx');
+    }
+
+    function resetToMockData() {
+      activeData = JSON.parse(JSON.stringify(INITIAL_DATA));
+      renderKpis();
+      renderMatrixTable();
+      updateCharts();
+      renderPillars();
+      processAiReport();
+      document.getElementById('btnResetData').classList.add('hidden');
+      showBanner('Dados oficiais restaurados com sucesso.', 'success');
+    }
+
+    function showBanner(msg, type) {
+      const banner = document.getElementById('notificationBanner');
+      const text = document.getElementById('notificationMsg');
+      text.innerText = msg;
+      banner.className = `p-4 rounded-2xl border text-xs font-semibold flex items-center justify-between shadow-xl ${type === 'success' ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300' : 'bg-red-950/80 border-[#E60000]/40 text-red-300'}`;
+      banner.classList.remove('hidden');
+      setTimeout(() => banner.classList.add('hidden'), 5000);
+    }
+
+    function openKeyModal() {
+      document.getElementById('keyModal').classList.remove('hidden');
+    }
+
+    function closeKeyModal() {
+      document.getElementById('keyModal').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const val = document.getElementById('geminiKeyInput').value.trim();
+      if (val) {
+        sessionStorage.setItem('torrano_gemini_api_key', val);
+        document.getElementById('keyBtnText').innerText = 'Chave Conectada';
+      }
+      closeKeyModal();
+      showBanner('Chave de API salva com sucesso!', 'success');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderKpis();
+      renderMatrixTable();
+      initCharts();
+      renderPillars();
+      processAiReport();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Torrano Negócios Imobiliários - Executive BI Dashboard",
+  "description": "Dashboard executivo de Business Intelligence para Torrano Negócios Imobiliários com gestão de VGV, funil de conversão, destratos e consultoria com IA para Flávio Torrano.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
